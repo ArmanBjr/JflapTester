@@ -100,3 +100,24 @@ def test_parser_no_initial_state(tmp_path):
 </automaton></structure>"""
     with pytest.raises(JFLAPParseError, match="No initial state"):
         build_from_xml(xml, tmp_path)
+
+
+# ── JFLAP 6.x uses <block> instead of <state> ────────────────────────────────
+_JFLAP6_TM_XML = """\
+<structure><type>turing</type>
+<automaton>
+  <block id="0" name="q0"><x>100</x><y>100</y><initial/></block>
+  <block id="1" name="q_accept"><x>200</x><y>100</y><final/></block>
+  <transition>
+    <from>0</from><to>1</to>
+    <read>a</read><write>a</write><move>R</move>
+  </transition>
+</automaton></structure>"""
+
+def test_parser_jflap6_block_elements(tmp_path):
+    """JFLAP 6 files use <block> for states — parser must handle both."""
+    data, machine = build_from_xml(_JFLAP6_TM_XML, tmp_path)
+    assert data.machine_type == MachineType.TURING
+    assert len(data.states) == 2
+    assert data.initial_state == "0"
+    assert "1" in data.accept_states

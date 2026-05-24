@@ -108,7 +108,10 @@ class JFLAPParser:
 
     def _parse_states(self, automaton: ET.Element) -> tuple[dict[str, StateData], str, set[str], set[str]]:
         """
-        Parse all <state> elements.
+        Parse all state elements.
+        JFLAP 7 uses <state id=... name=...> with x/y as attributes.
+        JFLAP 6 uses <block id=... name=...> with x/y as child elements.
+        Both carry the same <initial/>, <final/>, <reject/> children.
         Returns (states_dict, initial_state_id, accept_state_ids, reject_state_ids).
         """
         states: dict[str, StateData] = {}
@@ -116,7 +119,9 @@ class JFLAPParser:
         accept_states: set[str] = set()
         reject_states: set[str] = set()
 
-        for state_el in automaton.findall("state"):
+        state_elements = automaton.findall("state") or automaton.findall("block")
+
+        for state_el in state_elements:
             sid = state_el.get("id", "")
             name = state_el.get("name", sid)
             is_initial = state_el.find("initial") is not None
