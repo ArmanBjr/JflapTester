@@ -101,6 +101,11 @@ class JFLAPParser:
         """Return "" for any epsilon-like symbol, otherwise return the symbol as-is."""
         return "" if self._is_epsilon(symbol) else symbol
 
+    @staticmethod
+    def _normalise_tm_symbol(symbol: str) -> str:
+        """Normalise TM tape symbols: JFLAP uses both "" and " " (space) for blank."""
+        return "" if symbol in ("", " ") else symbol
+
     def _parse_states(self, automaton: ET.Element) -> tuple[dict[str, StateData], str, set[str], set[str]]:
         """
         Parse all <state> elements.
@@ -236,8 +241,8 @@ class JFLAPParser:
         )
 
     def _parse_single_tape_action(self, t: ET.Element) -> TMTapeAction:
-        read  = self._normalise_symbol(self._get_text(t, "read"))
-        write = self._normalise_symbol(self._get_text(t, "write"))
+        read  = self._normalise_tm_symbol(self._get_text(t, "read"))
+        write = self._normalise_tm_symbol(self._get_text(t, "write"))
         move  = self._get_text(t, "move", default="S").upper() or "S"
         return TMTapeAction(read, write, move)
 
@@ -257,8 +262,8 @@ class JFLAPParser:
 
         actions: list[TMTapeAction] = []
         for i in range(num_tapes):
-            read  = self._normalise_symbol(reads.get(i, ""))
-            write = self._normalise_symbol(writes.get(i, ""))
+            read  = self._normalise_tm_symbol(reads.get(i, ""))
+            write = self._normalise_tm_symbol(writes.get(i, ""))
             move  = (moves.get(i, "S") or "S").upper()
             actions.append(TMTapeAction(read, write, move))
 
