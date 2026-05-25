@@ -11,6 +11,7 @@ from parser.jflap_parser import JFLAPParseError
 from runner.test_runner import RunReport, TestRunner
 from ui.options_panel import OptionsPanel
 from ui.results_panel import ResultsPanel
+from ui.batch_window import BatchWindow
 
 # Human-friendly machine type labels
 _TYPE_LABELS: dict[MachineType, str] = {
@@ -101,7 +102,13 @@ class App(ctk.CTk):
             command=self._toggle_theme,
             font=ctk.CTkFont(size=12),
         )
-        self._theme_btn.pack(side="right")
+        self._theme_btn.pack(side="right", padx=(6, 0))
+
+        ctk.CTkButton(
+            header, text="⊞  Batch Marker", width=130, height=28,
+            command=self._open_batch_window,
+            font=ctk.CTkFont(size=12),
+        ).pack(side="right")
 
         # Machine file section
         self._build_machine_section(left)
@@ -371,6 +378,14 @@ class App(ctk.CTk):
         self._refresh_run_button()
         self._progress_bar.set(1)
         self._results_panel.display(report)
+
+    # ------------------------------------------------------------------
+    # Batch Marker
+    # ------------------------------------------------------------------
+
+    def _open_batch_window(self) -> None:
+        win = BatchWindow(self)
+        win.focus()
 
     # ------------------------------------------------------------------
     # Theme toggle
